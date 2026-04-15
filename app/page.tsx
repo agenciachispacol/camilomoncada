@@ -1,105 +1,67 @@
-import {
-  MessageCircle,
-  Instagram,
-  Calendar,
-  GraduationCap,
-  Sparkles,
-  BookOpen,
-  Rocket,
-} from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import NeonBackground from "@/components/NeonBackground";
 import Hero from "@/components/Hero";
-import LinkCard from "@/components/LinkCard";
 import Marquee from "@/components/Marquee";
 import CalEmbed from "@/components/CalEmbed";
 import SectionTitle from "@/components/SectionTitle";
-import { site, whatsappUrl } from "@/lib/site";
+import DynamicLinkCard from "@/components/DynamicLinkCard";
+import { getSettings, getLinks, whatsappUrlFrom } from "@/lib/data";
 
-// Icono TikTok (lucide no lo trae)
-function TikTokIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden
-    >
-      <path d="M19.6 6.7a5.3 5.3 0 0 1-3.2-1.2 5.3 5.3 0 0 1-2-3.5h-3.3v13.5a2.6 2.6 0 1 1-1.9-2.5V9.5a5.9 5.9 0 1 0 5.2 5.9V9.2a8.6 8.6 0 0 0 5.2 1.7V7.5c-.1-.2 0-.5 0-.8z" />
-    </svg>
-  );
-}
+export const revalidate = 60;
 
-export default function Page() {
+export default async function Page() {
+  const [settings, links] = await Promise.all([getSettings(), getLinks()]);
+  const whatsappUrl = whatsappUrlFrom(settings);
+
   return (
     <main className="relative min-h-screen">
       <NeonBackground />
 
-      <Hero />
+      <Hero
+        name={settings.name}
+        role={settings.role}
+        tagline={settings.tagline}
+        subtagline={settings.subtagline}
+        avatarUrl={settings.avatar_url || undefined}
+      />
 
       <Marquee />
 
-      {/* Links principales */}
+      {/* Árbol de links dinámico */}
       <section className="px-5 py-10">
         <div className="mx-auto w-full max-w-xl space-y-3">
-          <LinkCard
-            href={whatsappUrl}
-            external
-            icon={<MessageCircle size={22} />}
-            title="Escríbeme por WhatsApp"
-            subtitle="Mensaje directo con respuesta rápida"
-            accent="green"
-            delay={0.05}
+          {/* CTA WhatsApp siempre visible arriba, con enlace calculado dinámicamente */}
+          <DynamicLinkCard
+            index={0}
+            item={{
+              id: "whatsapp",
+              title: "Escríbeme por WhatsApp",
+              subtitle: "Mensaje directo · respuesta rápida",
+              url: whatsappUrl,
+              icon_name: "MessageCircle",
+              icon_url: null,
+              accent: "green",
+              external: true,
+              position: 0,
+              visible: true,
+            }}
           />
-          <LinkCard
-            href="#consultoria"
-            icon={<Calendar size={22} />}
-            title="Consultoría gratuita 30 min"
-            subtitle="Agenda vía Cal.com"
-            accent="pink"
-            delay={0.1}
-          />
-          <LinkCard
-            href="#clases"
-            icon={<GraduationCap size={22} />}
-            title="Clases de IA para emprendimientos"
-            subtitle="Formación virtual práctica"
-            accent="purple"
-            delay={0.15}
-          />
-          <LinkCard
-            href="/articulos"
-            icon={<BookOpen size={22} />}
-            title="Artículos & tips"
-            subtitle="IA aplicada a negocios"
-            accent="cyan"
-            delay={0.2}
-          />
-          <LinkCard
-            href="/prompts"
-            icon={<Sparkles size={22} />}
-            title="Biblioteca de prompts"
-            subtitle="Plantillas listas para usar"
-            accent="pink"
-            delay={0.25}
-          />
-          <LinkCard
-            href={site.socials.instagram}
-            external
-            icon={<Instagram size={22} />}
-            title="Instagram"
-            subtitle="@camilomoncada.ia"
-            accent="purple"
-            delay={0.3}
-          />
-          <LinkCard
-            href={site.socials.tiktok}
-            external
-            icon={<TikTokIcon className="h-5 w-5" />}
-            title="TikTok"
-            subtitle="@camilomoncada.ia"
-            accent="cyan"
-            delay={0.35}
-          />
+          <p className="px-2 text-center text-[10px] uppercase tracking-wider text-white/35">
+            Al escribirme aceptas la{" "}
+            <a
+              href="/privacidad"
+              className="text-neon-cyan underline underline-offset-2 hover:text-white"
+            >
+              política de datos
+            </a>
+          </p>
+
+          {/* Links del árbol editables desde /estudio */}
+          {links
+            .filter((l) => !/wa\.me|whatsapp/i.test(l.url))
+            .map((item, i) => (
+              <DynamicLinkCard key={item.id} item={item} index={i + 1} />
+            ))}
         </div>
       </section>
 
@@ -110,22 +72,18 @@ export default function Page() {
           <div className="grid gap-4 sm:grid-cols-2">
             {[
               {
-                icon: <Rocket size={22} />,
                 title: "Consultoría estratégica",
                 desc: "Diagnóstico de tu negocio y hoja de ruta con IA.",
               },
               {
-                icon: <GraduationCap size={22} />,
                 title: "Clases virtuales",
                 desc: "Aprende a usar IA para acelerar tu emprendimiento.",
               },
               {
-                icon: <Sparkles size={22} />,
                 title: "Automatizaciones",
                 desc: "Agentes y workflows para ahorrarte horas cada semana.",
               },
               {
-                icon: <BookOpen size={22} />,
                 title: "Mentoría continua",
                 desc: "Acompañamiento mes a mes para crecer tu empresa.",
               },
@@ -134,9 +92,6 @@ export default function Page() {
                 key={s.title}
                 className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md transition-all duration-300 hover:border-neon-pink/40 hover:shadow-[0_0_25px_rgba(255,43,214,0.3)]"
               >
-                <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-neon-pink/25 to-neon-cyan/25">
-                  {s.icon}
-                </div>
                 <h3 className="text-base font-bold text-white sm:text-lg">
                   {s.title}
                 </h3>
@@ -148,21 +103,42 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Cal.com consultoría */}
+      {/* Cal.com */}
       <section id="consultoria" className="scroll-mt-10 px-5 py-12">
         <div className="mx-auto max-w-xl">
-          <SectionTitle kicker="Agenda">
-            Reserva 30 min conmigo
-          </SectionTitle>
-          <CalEmbed />
+          <SectionTitle kicker="Agenda">Reserva 30 min conmigo</SectionTitle>
+          <CalEmbed
+            namespace={settings.cal_namespace}
+            link={settings.cal_link}
+          />
         </div>
       </section>
 
       {/* Footer */}
       <footer className="px-5 pb-10 pt-8 text-center">
-        <p className="text-xs text-white/40">
-          © {new Date().getFullYear()} {site.name} · Hecho con IA y mucho neon
-        </p>
+        <div className="mx-auto max-w-xl space-y-2">
+          <div className="flex items-center justify-center gap-3 text-xs text-white/45">
+            <a
+              href="/privacidad"
+              className="uppercase tracking-wider hover:text-neon-cyan"
+            >
+              Política de datos
+            </a>
+            <span className="text-white/15">·</span>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="uppercase tracking-wider hover:text-neon-cyan"
+            >
+              Contacto
+            </a>
+          </div>
+          <p className="text-[11px] text-white/35">
+            © {new Date().getFullYear()} {settings.name} · Hecho con IA y mucho
+            neon
+          </p>
+        </div>
       </footer>
     </main>
   );

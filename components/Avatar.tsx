@@ -1,16 +1,27 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { site } from "@/lib/site";
+
+type Props = {
+  name: string;
+  initials?: string;
+  url?: string;
+};
 
 /**
- * Avatar con anillo neon rotativo + iniciales.
- * Mobile first: tamaño por defecto pequeño, escala con sm:/md:.
- * Fácil de reemplazar: si pones una imagen en /public/camilo.jpg,
- * se usará automáticamente.
+ * Avatar con anillo cónico rotativo + halo pulsante.
+ * Mobile first: tamaño por defecto 128px, escala con sm/md.
+ * Si `url` está vacío, muestra iniciales con efecto neon.
  */
-export default function Avatar() {
-  const photoUrl = "/camilo.jpg"; // cuando subas la imagen, se mostrará
+export default function Avatar({ name, initials, url }: Props) {
+  const fallback =
+    initials ||
+    name
+      .split(" ")
+      .map((p) => p[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
 
   return (
     <div className="relative mx-auto flex h-32 w-32 items-center justify-center sm:h-40 sm:w-40 md:h-48 md:w-48">
@@ -42,19 +53,18 @@ export default function Avatar() {
 
       {/* Foto o iniciales */}
       <div className="relative z-10 flex h-[86%] w-[86%] items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-ink-800 to-ink-950">
-        {/* Fallback iniciales (se ocultan si la img carga) */}
-        <span className="absolute font-display text-4xl font-black tracking-tight neon-text-pink sm:text-5xl md:text-6xl">
-          {site.initials}
-        </span>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photoUrl}
-          alt={site.name}
-          className="relative h-full w-full object-cover"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
-        />
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={url}
+            alt={name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span className="font-display text-4xl font-black tracking-tight neon-text-pink sm:text-5xl md:text-6xl">
+            {fallback}
+          </span>
+        )}
       </div>
     </div>
   );

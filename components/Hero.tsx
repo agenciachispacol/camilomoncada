@@ -2,9 +2,22 @@
 
 import { motion } from "framer-motion";
 import Avatar from "./Avatar";
-import { site } from "@/lib/site";
 
-export default function Hero() {
+type Props = {
+  name: string;
+  role: string;
+  tagline: string;
+  subtagline: string;
+  avatarUrl?: string;
+};
+
+export default function Hero({
+  name,
+  role,
+  tagline,
+  subtagline,
+  avatarUrl,
+}: Props) {
   return (
     <section className="relative px-5 pb-8 pt-12 sm:pt-16">
       <div className="mx-auto flex max-w-xl flex-col items-center text-center">
@@ -27,7 +40,7 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className="mt-5"
         >
-          <Avatar />
+          <Avatar name={name} url={avatarUrl} />
         </motion.div>
 
         <motion.h1
@@ -36,35 +49,41 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="text-display mt-6"
         >
-          <span className="neon-gradient-text">{site.name}</span>
+          <span className="neon-gradient-text">{name}</span>
         </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          className="mt-2 text-xs font-bold uppercase tracking-[0.35em] text-neon-cyan sm:text-sm"
-        >
-          {site.role}
-        </motion.p>
+        {role && (
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="mt-2 text-xs font-bold uppercase tracking-[0.35em] text-neon-cyan sm:text-sm"
+          >
+            {role}
+          </motion.p>
+        )}
 
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.45 }}
-          className="text-lead mt-5 max-w-md text-white/80"
-        >
-          {site.tagline}
-        </motion.p>
+        {tagline && (
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="text-lead mt-5 max-w-md text-white/80"
+          >
+            {tagline}
+          </motion.p>
+        )}
 
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.55 }}
-          className="mt-2 max-w-md text-sm text-white/55"
-        >
-          {site.subtagline}
-        </motion.p>
+        {subtagline && (
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55 }}
+            className="mt-2 max-w-md text-sm text-white/55"
+          >
+            {subtagline}
+          </motion.p>
+        )}
       </div>
     </section>
   );

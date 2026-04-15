@@ -1,16 +1,25 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import NeonBackground from "@/components/NeonBackground";
 import SectionTitle from "@/components/SectionTitle";
 import CopyButton from "@/components/CopyButton";
+import RenderedContent from "@/components/RenderedContent";
 import { supabase, type Prompt } from "@/lib/supabase";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Biblioteca de Prompts · Camilo Moncada",
+  description:
+    "Biblioteca de prompts listos para usar en tu negocio: marketing, ventas, automatización y crecimiento con IA.",
+};
 
 async function getPrompts(): Promise<Prompt[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("prompts")
     .select("*")
+    .eq("visible", true)
     .order("created_at", { ascending: false });
   if (error) return [];
   return (data as Prompt[]) ?? [];
@@ -51,7 +60,9 @@ export default async function PromptsPage() {
                   <CopyButton text={p.body} />
                 </div>
                 {p.description && (
-                  <p className="mt-1 text-sm text-white/65">{p.description}</p>
+                  <div className="mt-2 text-sm">
+                    <RenderedContent html={p.description} />
+                  </div>
                 )}
                 <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-ink-950/70 p-4 text-xs leading-relaxed text-white/85 sm:text-sm">
                   <code>{p.body}</code>

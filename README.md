@@ -1,17 +1,58 @@
 # Camilo Moncada · Landing neon
 
-Landing personal tipo Linktree con diseño **neon minimalista**, **mobile first** y muchas animaciones. Hecha en **Next.js 14 + Tailwind + Framer Motion** e integrada con **Supabase** (artículos y biblioteca de prompts) y **Cal.com** (consultorías gratuitas).
+Landing personal tipo Linktree con diseño **neon minimalista**, **mobile first** y muchas animaciones. Hecha en **Next.js 14 + Tailwind + Framer Motion + Tiptap** e integrada con **Supabase** (Auth + Storage + DB) y **Cal.com** (consultorías gratuitas).
+
+Todo el contenido (perfil, links, WhatsApp, Cal, artículos, prompts, política de datos) se administra desde un panel privado en `/estudio` con login por email y contraseña.
 
 ## Stack
 
-- Next.js 14 (App Router)
-- Tailwind CSS + diseño mobile first
-- Framer Motion para animaciones
-- Supabase para artículos y prompts
+- Next.js 14 App Router · Tailwind CSS · Framer Motion
+- Tiptap (rich text editor) con estilos neon personalizados
+- Supabase Auth (login por email) + Storage (fotos e iconos) + Postgres
 - @calcom/embed-react para el booking
 - lucide-react para iconos
+- Mobile first + SEO + JSON-LD + sitemap dinámico
 
-## Puesta en marcha
+## Rutas
+
+- `/` — Landing dinámica (todo viene de Supabase)
+- `/articulos` y `/articulos/[slug]` — Blog
+- `/prompts` — Biblioteca de prompts
+- `/privacidad` — Política de tratamiento de datos (editable)
+- `/estudio` — Panel admin privado con login (noindex + disallow en robots)
+- `/sitemap.xml` y `/robots.txt` — SEO
+
+## Variables de entorno
+
+| Variable | Qué es |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key (lectura pública) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role, solo servidor (para escrituras y storage) |
+| `NEXT_PUBLIC_SITE_URL` | URL canónica del sitio para SEO/sitemap |
+
+## Setup de Supabase (una sola vez)
+
+1. Crea un proyecto en [supabase.com](https://supabase.com) y copia sus keys.
+2. En el SQL editor, ejecuta en orden:
+   - `supabase/schema.sql` — tablas `articles` y `prompts`
+   - `supabase/002_storage_and_settings.sql` — bucket `media`, tabla `site_settings`, tabla `links`, columnas `visible`
+3. En **Authentication → Users → Add user**, crea tu usuario admin (email + contraseña). Esta es tu clave secreta para entrar a `/estudio`.
+4. Completa `.env.local` con las keys.
+
+## Panel `/estudio`
+
+Módulos:
+
+- **Perfil** — nombre, rol, tagline, subtagline, foto (subida al bucket `media`)
+- **Links** — árbol completo de enlaces con CRUD, upload de ícono custom, orden, visibilidad
+- **Contacto** — número de WhatsApp, mensaje predeterminado, Cal.com namespace y link
+- **Contenido** — tabs de Artículos y Prompts con editor rich-text (Tiptap estilo neon), visibilidad, portadas
+- **Legal** — política de tratamiento de datos (editor rich-text)
+
+Todas las escrituras pasan por API routes (`/api/content`, `/api/links`, `/api/settings`, `/api/upload`) que validan el JWT de Supabase Auth y usan el service role para bypassear RLS.
+
+## Puesta en marcha local
 
 ```bash
 npm install
@@ -20,52 +61,8 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Visita http://localhost:3000.
-
-### Variables de entorno
-
-| Variable | Qué es |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key (lectura pública) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role (solo servidor, usado por `/api/publish`) |
-| `ADMIN_TOKEN` | Token compartido para proteger el panel `/admin` |
-
-## Supabase
-
-1. Crea un proyecto en [supabase.com](https://supabase.com).
-2. Ejecuta `supabase/schema.sql` en el SQL editor.
-3. Copia las keys a tu `.env.local`.
-
-## Rutas
-
-- `/` — Landing neon con hero, links, servicios y Cal.com
-- `/articulos` — Listado de artículos desde Supabase
-- `/articulos/[slug]` — Detalle de artículo
-- `/prompts` — Biblioteca de prompts con botón copiar
-- `/admin` — Formulario protegido por `ADMIN_TOKEN` para publicar artículos/prompts
-- `/api/publish` — API POST que escribe en Supabase usando el service role
-
-## Personalización
-
-Todos los datos personales están en `lib/site.ts` (nombre, WhatsApp, mensaje, Cal.com, redes sociales). Cambia allí y listo.
-
-### Foto
-
-Cuando tengas tu foto, súbela como `public/camilo.jpg` (o cambia la ruta en `components/Avatar.tsx`). Mientras no exista, el avatar muestra las iniciales con efecto neon.
-
-### WhatsApp
-
-El número y el mensaje predeterminado viven en `lib/site.ts`. El enlace se genera como `https://wa.me/<numero>?text=<mensaje>`.
-
-### Cal.com
-
-El embed usa el namespace `30min` y el link `camilo-moncada-0kerld/30min`. Edítalo en `lib/site.ts` y en `components/CalEmbed.tsx`.
+Visita `http://localhost:3000` y el panel en `http://localhost:3000/estudio`.
 
 ## Deploy
 
 Recomendado: [Vercel](https://vercel.com). Importa el repo, configura las variables de entorno y listo.
-
-## Licencia
-
-Uso personal de Camilo Moncada.

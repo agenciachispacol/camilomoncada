@@ -1,10 +1,23 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import NeonBackground from "@/components/NeonBackground";
 import AdminShell from "./AdminShell";
 
-export const metadata = { title: "Admin · Camilo Moncada" };
+export const metadata: Metadata = {
+  title: "Estudio · Camilo Moncada",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+};
 
-export default function AdminPage() {
+export default function EstudioPage() {
   return (
     <main className="relative min-h-screen px-5 py-10">
       <NeonBackground />

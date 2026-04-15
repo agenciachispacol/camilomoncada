@@ -1,9 +1,10 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Pencil, Trash2 } from "lucide-react";
 import type { Article, Prompt } from "@/lib/supabase";
 
 type Kind = "article" | "prompt";
+type ItemVisible = (Article | Prompt) & { visible?: boolean };
 
 export default function ContentList({
   kind,
@@ -11,12 +12,14 @@ export default function ContentList({
   loading,
   onEdit,
   onDelete,
+  onToggleVisible,
 }: {
   kind: Kind;
   items: (Article | Prompt)[];
   loading: boolean;
   onEdit: (item: Article | Prompt) => void;
   onDelete: (id: string) => void;
+  onToggleVisible: (item: ItemVisible) => void;
 }) {
   if (loading) {
     return (
@@ -42,10 +45,12 @@ export default function ContentList({
 
   return (
     <div className="space-y-3">
-      {items.map((item) => {
+      {items.map((raw) => {
+        const item = raw as ItemVisible;
         const a = item as Article;
         const p = item as Prompt;
         const isArticle = kind === "article";
+        const visible = item.visible !== false;
         return (
           <div
             key={item.id}
@@ -53,13 +58,17 @@ export default function ContentList({
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-base font-bold text-white sm:text-lg">
+                <h3
+                  className={`truncate text-base font-bold sm:text-lg ${visible ? "text-white" : "text-white/40 line-through"}`}
+                >
                   {item.title}
                 </h3>
-                <p className="mt-1 line-clamp-2 text-sm text-white/60">
+                <p className="mt-1 line-clamp-2 text-sm text-white/55">
                   {isArticle
-                    ? a.excerpt || a.content?.slice(0, 120)
-                    : p.description || p.body?.slice(0, 120)}
+                    ? a.excerpt ||
+                      (a.content || "").replace(/<[^>]+>/g, "").slice(0, 120)
+                    : p.description ||
+                      (p.body || "").slice(0, 120)}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-wider text-white/40">
                   <span className="text-neon-cyan">
@@ -69,6 +78,11 @@ export default function ContentList({
                       day: "numeric",
                     })}
                   </span>
+                  {!visible && (
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-white/50">
+                      oculto
+                    </span>
+                  )}
                   {isArticle && a.slug && (
                     <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
                       /{a.slug}
@@ -86,6 +100,13 @@ export default function ContentList({
                 </div>
               </div>
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                <button
+                  onClick={() => onToggleVisible(item)}
+                  aria-label="Visibilidad"
+                  className="rounded-full border border-white/15 bg-white/5 p-2 text-white/70 backdrop-blur-md transition-all hover:border-neon-cyan/50 hover:text-neon-cyan active:scale-95"
+                >
+                  {visible ? <Eye size={15} /> : <EyeOff size={15} />}
+                </button>
                 <button
                   onClick={() => onEdit(item)}
                   aria-label="Editar"

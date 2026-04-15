@@ -3,24 +3,29 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import type { Article, Prompt } from "@/lib/supabase";
+import NeonEditor from "@/components/NeonEditor";
+import Field, { inputCls } from "./shared/Field";
+import UploadField from "./shared/UploadField";
+import SaveButton from "./shared/SaveButton";
 
 type Kind = "article" | "prompt";
-type Item = Partial<Article & Prompt>;
+type Item = Partial<Article & Prompt & { visible: boolean }>;
 
 export default function ContentForm({
   kind,
   item,
   onSave,
   onCancel,
+  token,
 }: {
   kind: Kind;
   item: Item;
   onSave: (data: any, id?: string) => Promise<void>;
   onCancel: () => void;
+  token: string;
 }) {
   const isEdit = Boolean(item?.id);
 
-  // shared
   const [title, setTitle] = useState(item.title ?? "");
   // article
   const [slug, setSlug] = useState(item.slug ?? "");
@@ -31,9 +36,26 @@ export default function ContentForm({
   const [description, setDescription] = useState(item.description ?? "");
   const [body, setBody] = useState(item.body ?? "");
   const [tags, setTags] = useState((item.tags ?? []).join(", "));
+  // shared
+  const [visible, setVisible] = useState(item.visible ?? true);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Uploader para imágenes dentro del editor
+  const uploadImage = async (file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("folder", kind === "article" ? "articles" : "prompts");
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Error subiendo");
+    return json.url;
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +70,7 @@ export default function ContentForm({
               excerpt,
               content,
               cover_url: coverUrl,
+              visible,
             }
           : {
               title,
@@ -57,6 +80,7 @@ export default function ContentForm({
                 .split(",")
                 .map((t) => t.trim())
                 .filter(Boolean),
+              visible,
             };
       await onSave(data, item.id);
     } catch (err: any) {
@@ -72,8 +96,9 @@ export default function ContentForm({
       className="relative rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md sm:p-6"
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold sm:text-xl neon-text-pink">
-          {isEdit ? "Editar" : "Nuevo"} {kind === "article" ? "artículo" : "prompt"}
+        <h2 className="text-lg font-bold neon-text-pink sm:text-xl">
+          {isEdit ? "Editar" : "Nuevo"}{" "}
+          {kind === "article" ? "artículo" : "prompt"}
         </h2>
         <button
           type="button"
@@ -112,38 +137,45 @@ export default function ContentForm({
                 className={`${inputCls} min-h-[80px]`}
               />
             </Field>
-            <Field label="Contenido">
-              <textarea
-                required
+            <UploadField
+              value={coverUrl ?? ""}
+              onChange={setCoverUrl}
+              token={token}
+              folder="articles"
+              label="Portada"
+              aspect="wide"
+            />
+            <div>
+              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
+                Contenido (editor enriquecido)
+              </span>
+              <NeonEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className={`${inputCls} min-h-[260px] font-mono text-sm`}
+                onChange={setContent}
+                placeholder="Escribe tu artículo..."
+                onImageUpload={uploadImage}
               />
-            </Field>
-            <Field label="URL de portada (opcional)">
-              <input
-                value={coverUrl}
-                onChange={(e) => setCoverUrl(e.target.value)}
-                className={inputCls}
-                placeholder="https://..."
-              />
-            </Field>
+            </div>
           </>
         ) : (
           <>
-            <Field label="Descripción corta">
-              <input
+            <div>
+              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
+                Descripción (editor enriquecido)
+              </span>
+              <NeonEditor
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className={inputCls}
+                onChange={setDescription}
+                placeholder="Explica para qué sirve este prompt..."
+                onImageUpload={uploadImage}
               />
-            </Field>
-            <Field label="Prompt">
+            </div>
+            <Field label="Prompt (texto plano para copiar)">
               <textarea
                 required
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className={`${inputCls} min-h-[260px] font-mono text-sm`}
+                className={`${inputCls} min-h-[220px] font-mono text-sm`}
                 placeholder="Actúa como..."
               />
             </Field>
@@ -158,21 +190,35 @@ export default function ContentForm({
           </>
         )}
 
+        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          <input
+            type="checkbox"
+            checked={visible}
+            onChange={(e) => setVisible(e.target.checked)}
+            className="h-4 w-4 accent-neon-pink"
+          />
+          <span className="text-sm text-white/80">
+            Visible públicamente
+            <span className="ml-2 text-xs text-white/40">
+              {visible ? "aparece en la landing" : "oculto"}
+            </span>
+          </span>
+        </label>
+
         <div className="flex flex-col gap-2 pt-2 sm:flex-row">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold uppercase tracking-wider text-white/70 transition-all hover:text-white sm:w-auto"
+            className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold uppercase tracking-wider text-white/70 transition-all hover:text-white"
           >
             Cancelar
           </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="relative flex-1 rounded-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-[length:200%_100%] py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_25px_rgba(255,43,214,0.5)] transition-[background-position] duration-500 hover:bg-[position:100%_0%] active:scale-[0.98] disabled:opacity-60"
-          >
-            {saving ? "Guardando..." : isEdit ? "Guardar cambios" : "Publicar"}
-          </button>
+          <div className="flex-1">
+            <SaveButton
+              loading={saving}
+              label={isEdit ? "Guardar cambios" : "Publicar"}
+            />
+          </div>
         </div>
 
         {error && (
@@ -180,25 +226,5 @@ export default function ContentForm({
         )}
       </div>
     </form>
-  );
-}
-
-const inputCls =
-  "w-full rounded-xl border border-white/10 bg-ink-950/60 px-4 py-3 text-sm text-white placeholder:text-white/30 transition-colors focus:border-neon-cyan/60 focus:outline-none";
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
-        {label}
-      </span>
-      {children}
-    </label>
   );
 }
