@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  background: #05030f;
+  color: #f5f5ff;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Scroll suave - importante en mobile */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Tipografía fluida mobile first */
+.text-display {
+  font-size: clamp(2rem, 9vw, 4.5rem);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.text-h2 {
+  font-size: clamp(1.4rem, 5.5vw, 2.25rem);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.text-lead {
+  font-size: clamp(0.95rem, 3.8vw, 1.125rem);
+  line-height: 1.55;
+}
+
+/* Neon helpers */
+.neon-text-pink {
+  color: #fff;
+  text-shadow:
+    0 0 6px rgba(255, 43, 214, 0.9),
+    0 0 16px rgba(255, 43, 214, 0.7),
+    0 0 32px rgba(176, 38, 255, 0.55);
+}
+
+.neon-text-cyan {
+  color: #fff;
+  text-shadow:
+    0 0 6px rgba(0, 240, 255, 0.9),
+    0 0 16px rgba(0, 240, 255, 0.65),
+    0 0 32px rgba(0, 240, 255, 0.45);
+}
+
+.neon-gradient-text {
+  background: linear-gradient(
+    90deg,
+    #ff2bd6 0%,
+    #b026ff 25%,
+    #00f0ff 55%,
+    #39ff14 80%,
+    #ff2bd6 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Borde neon con gradiente en movimiento */
+.neon-border {
+  position: relative;
+  isolation: isolate;
+}
+.neon-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    120deg,
+    #ff2bd6,
+    #b026ff,
+    #00f0ff,
+    #39ff14,
+    #ff2bd6
+  );
+  background-size: 300% 100%;
+  animation: borderRun 5s linear infinite;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes borderRun {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 0%;
+  }
+}
+
+/* Fondo grid neon */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 43, 214, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, #000 40%, transparent 80%);
+}
+
+/* Glow blobs del fondo */
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Scrollbar fina */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0718;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff2bd6, #b026ff, #00f0ff);
+  border-radius: 9999px;
+}
+
+/* Focus accesible */
+:focus-visible {
+  outline: 2px solid #00f0ff;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Mejorar tap targets en móvil */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Respetar reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
