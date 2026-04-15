@@ -1,30 +1,21 @@
 import Link from "next/link";
 import NeonBackground from "@/components/NeonBackground";
-import SectionTitle from "@/components/SectionTitle";
-import AdminForm from "./AdminForm";
+import AdminShell from "./AdminShell";
 
 export const metadata = { title: "Admin · Camilo Moncada" };
 
 export default function AdminPage() {
   return (
-    <main className="relative min-h-screen px-5 py-12">
+    <main className="relative min-h-screen px-5 py-10">
       <NeonBackground />
-
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <Link
           href="/"
           className="mb-6 inline-block text-xs uppercase tracking-[0.25em] text-neon-cyan hover:text-white"
         >
-          ← Volver
+          ← Volver a la landing
         </Link>
-
-        <SectionTitle kicker="Privado">Subir contenido</SectionTitle>
-
-        <p className="mb-6 text-center text-sm text-white/60">
-          Publica artículos o prompts en tu biblioteca. Se guardan en Supabase.
-        </p>
-
-        <AdminForm />
+        <AdminShell />
       </div>
     </main>
   );
