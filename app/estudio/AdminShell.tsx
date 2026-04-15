@@ -1,40 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Lock, ShieldCheck, Mail } from "lucide-react";
-import type { Session } from "@supabase/supabase-js";
+import { LogOut, Lock, ShieldCheck, Mail, AlertTriangle } from "lucide-react";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseBrowser } from "@/lib/supabase-browser";
 import AdminDashboard from "./AdminDashboard";
 
 export default function AdminShell() {
-  const supabase = getSupabaseBrowser();
+  // El cliente Supabase se crea SOLO en el browser (después del mount)
+  // para evitar que SSR crashee si faltan las env vars NEXT_PUBLIC_*.
+  const clientRef = useRef<SupabaseClient | null>(null);
+  const [ready, setReady] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
   const [session, setSession] = useState<Session | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Carga sesión inicial y se suscribe a cambios
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setMounted(true);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
-      setSession(s),
-    );
-    return () => sub.subscription.unsubscribe();
-  }, [supabase]);
+    try {
+      const client = getSupabaseBrowser();
+      clientRef.current = client;
+      client.auth.getSession().then(({ data }) => {
+        setSession(data.session);
+        setReady(true);
+      });
+      const { data: sub } = client.auth.onAuthStateChange((_e, s) =>
+        setSession(s),
+      );
+      return () => sub.subscription.unsubscribe();
+    } catch (err: any) {
+      setInitError(
+        err?.message ||
+          "No se pudo inicializar Supabase. Revisa las variables de entorno.",
+      );
+      setReady(true);
+    }
+  }, []);
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!clientRef.current) return;
     setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await clientRef.current.auth.signInWithPassword({
       email: email.trim(),
       password,
     });
@@ -51,10 +64,48 @@ export default function AdminShell() {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (clientRef.current) await clientRef.current.auth.signOut();
   };
 
-  if (!mounted) return null;
+  if (!ready) {
+    return (
+      <div className="mx-auto h-64 max-w-md animate-pulse rounded-2xl border border-white/10 bg-white/[0.03]" />
+    );
+  }
+
+  if (initError) {
+    return (
+      <div className="mx-auto max-w-md rounded-2xl border border-neon-pink/40 bg-neon-pink/10 p-6 text-center backdrop-blur-md">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-neon-pink/20 text-neon-pink">
+          <AlertTriangle size={22} />
+        </div>
+        <h2 className="mb-2 text-lg font-bold text-white">
+          Supabase no está configurado
+        </h2>
+        <p className="text-sm text-white/70">
+          Falta configurar las variables de entorno en el hosting:
+        </p>
+        <ul className="mt-3 space-y-1 text-left text-xs text-white/60">
+          <li>
+            <code className="rounded bg-ink-950 px-1.5 py-0.5 text-neon-cyan">
+              NEXT_PUBLIC_SUPABASE_URL
+            </code>
+          </li>
+          <li>
+            <code className="rounded bg-ink-950 px-1.5 py-0.5 text-neon-cyan">
+              NEXT_PUBLIC_SUPABASE_ANON_KEY
+            </code>
+          </li>
+          <li>
+            <code className="rounded bg-ink-950 px-1.5 py-0.5 text-neon-cyan">
+              SUPABASE_SERVICE_ROLE_KEY
+            </code>
+          </li>
+        </ul>
+        <p className="mt-4 text-[11px] text-white/40">{initError}</p>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -88,10 +139,7 @@ export default function AdminShell() {
               <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
-          <AdminDashboard
-            session={session}
-            onInvalid={logout}
-          />
+          <AdminDashboard session={session} onInvalid={logout} />
         </motion.div>
       ) : (
         <motion.div

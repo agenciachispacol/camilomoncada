@@ -8,6 +8,13 @@ function unauthorized() {
   return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 }
 
+function unconfigured() {
+  return NextResponse.json(
+    { error: "Supabase no está configurado en el servidor" },
+    { status: 503 },
+  );
+}
+
 function slugify(s: string) {
   return s
     .toLowerCase()
@@ -30,6 +37,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "kind inválido" }, { status: 400 });
 
   const supabase = adminClient();
+  if (!supabase) return unconfigured();
   const { data, error } = await supabase
     .from(table)
     .select("*")
@@ -49,6 +57,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   const { kind, data } = body;
   const supabase = adminClient();
+  if (!supabase) return unconfigured();
 
   if (kind === "article") {
     if (!data?.title || !data?.content)
@@ -108,6 +117,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "kind inválido" }, { status: 400 });
 
   const supabase = adminClient();
+  if (!supabase) return unconfigured();
   const payload: Record<string, any> = {};
   if (kind === "article") {
     if (data.title !== undefined) payload.title = data.title;
@@ -153,6 +163,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "kind inválido" }, { status: 400 });
 
   const supabase = adminClient();
+  if (!supabase) return unconfigured();
   const { error } = await supabase.from(table).delete().eq("id", id);
   if (error)
     return NextResponse.json({ error: error.message }, { status: 400 });

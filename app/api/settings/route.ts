@@ -4,15 +4,25 @@ import { adminClient, requireUser } from "@/lib/supabase-admin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function unconfigured() {
+  return NextResponse.json(
+    { error: "Supabase no está configurado en el servidor" },
+    { status: 503 },
+  );
+}
+
 // GET /api/settings → devuelve todas las settings (lectura pública)
 export async function GET() {
   const supabase = adminClient();
+  if (!supabase) return unconfigured();
   const { data, error } = await supabase
     .from("site_settings")
     .select("key, value");
   if (error)
     return NextResponse.json({ error: error.message }, { status: 400 });
-  const obj = Object.fromEntries((data ?? []).map((r: any) => [r.key, r.value]));
+  const obj = Object.fromEntries(
+    (data ?? []).map((r: any) => [r.key, r.value]),
+  );
   return NextResponse.json({ settings: obj });
 }
 
@@ -37,6 +47,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Sin cambios" }, { status: 400 });
 
   const supabase = adminClient();
+  if (!supabase) return unconfigured();
   const rows = Object.entries(updates).map(([key, value]) => ({
     key,
     value: value ?? "",

@@ -36,6 +36,11 @@ export async function POST(req: Request) {
     .slice(2, 8)}.${ext}`;
 
   const supabase = adminClient();
+  if (!supabase)
+    return NextResponse.json(
+      { error: "Supabase no está configurado en el servidor" },
+      { status: 503 },
+    );
   const { error } = await supabase.storage
     .from("media")
     .upload(path, bytes, {

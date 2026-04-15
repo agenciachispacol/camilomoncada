@@ -10,6 +10,11 @@ export async function GET(req: Request) {
   if (!user)
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   const supabase = adminClient();
+  if (!supabase)
+    return NextResponse.json(
+      { error: "Supabase no está configurado en el servidor" },
+      { status: 503 },
+    );
   const { data, error } = await supabase
     .from("links")
     .select("*")
@@ -35,6 +40,11 @@ export async function POST(req: Request) {
     );
 
   const supabase = adminClient();
+  if (!supabase)
+    return NextResponse.json(
+      { error: "Supabase no está configurado en el servidor" },
+      { status: 503 },
+    );
   // Calcular posición al final si no viene
   const { data: maxRow } = await supabase
     .from("links")
@@ -73,6 +83,11 @@ export async function PATCH(req: Request) {
   if (!body?.id)
     return NextResponse.json({ error: "Falta id" }, { status: 400 });
   const supabase = adminClient();
+  if (!supabase)
+    return NextResponse.json(
+      { error: "Supabase no está configurado en el servidor" },
+      { status: 503 },
+    );
   const allowed = [
     "title",
     "subtitle",
@@ -108,6 +123,11 @@ export async function DELETE(req: Request) {
   if (!body?.id)
     return NextResponse.json({ error: "Falta id" }, { status: 400 });
   const supabase = adminClient();
+  if (!supabase)
+    return NextResponse.json(
+      { error: "Supabase no está configurado en el servidor" },
+      { status: 503 },
+    );
   const { error } = await supabase.from("links").delete().eq("id", body.id);
   if (error)
     return NextResponse.json({ error: error.message }, { status: 400 });
