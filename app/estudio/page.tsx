@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import NeonBackground from "@/components/NeonBackground";
 import AdminShell from "./AdminShell";
 
+// El panel es 100% client-side (auth, fetch, editor). No lo prerenderizamos
+// para evitar inicializar el cliente Supabase en build time.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Estudio · Camilo Moncada",
   robots: {
