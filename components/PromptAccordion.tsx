@@ -115,6 +115,22 @@ export default function PromptAccordion({
                   {selected.title}
                 </h2>
 
+                {/* CTA Copy arriba para prompts largos */}
+                <button
+                  onClick={() => handleCopy(selected.body)}
+                  className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-[length:200%_100%] py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_30px_rgba(255,43,214,0.55)] transition-[background-position,transform] duration-500 hover:bg-[position:100%_0%] active:scale-[0.97]"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={18} /> Copiado
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={18} /> Copiar Prompt
+                    </>
+                  )}
+                </button>
+
                 {selected.description && (
                   <div className="mt-3 text-sm text-white/75">
                     <RenderedContent html={selected.description} />
@@ -142,21 +158,6 @@ export default function PromptAccordion({
                   </div>
                 )}
 
-                {/* CTA Copy */}
-                <button
-                  onClick={() => handleCopy(selected.body)}
-                  className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan bg-[length:200%_100%] py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_30px_rgba(255,43,214,0.55)] transition-[background-position,transform] duration-500 hover:bg-[position:100%_0%] active:scale-[0.97]"
-                >
-                  {copied ? (
-                    <>
-                      <Check size={18} /> Copiado
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={18} /> Copiar Prompt
-                    </>
-                  )}
-                </button>
               </div>
             </motion.div>
           </motion.div>
