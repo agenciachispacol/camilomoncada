@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import NeonBackground from "@/components/NeonBackground";
 import SectionTitle from "@/components/SectionTitle";
+import ArticleAccordion from "@/components/ArticleAccordion";
 import { supabase, type Article } from "@/lib/supabase";
 
 export const revalidate = 60;
@@ -45,39 +46,7 @@ export default async function ArticlesPage() {
             Aún no hay artículos publicados. Vuelve pronto.
           </div>
         ) : (
-          <div className="space-y-4">
-            {articles.map((a) => (
-              <Link
-                key={a.id}
-                href={`/articulos/${a.slug}`}
-                className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition-all duration-300 hover:border-neon-pink/40 hover:shadow-[0_0_25px_rgba(255,43,214,0.3)]"
-              >
-                {a.cover_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={a.cover_url}
-                    alt={a.title}
-                    className="h-40 w-full object-cover"
-                  />
-                )}
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-white group-hover:neon-text-pink sm:text-xl">
-                    {a.title}
-                  </h3>
-                  {a.excerpt && (
-                    <p className="mt-2 text-sm text-white/65">{a.excerpt}</p>
-                  )}
-                  <p className="mt-3 text-[10px] uppercase tracking-[0.25em] text-neon-cyan">
-                    {new Date(a.created_at).toLocaleDateString("es-CO", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <ArticleAccordion articles={articles} />
         )}
       </div>
     </main>

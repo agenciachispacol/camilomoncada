@@ -2,8 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import NeonBackground from "@/components/NeonBackground";
 import SectionTitle from "@/components/SectionTitle";
-import CopyButton from "@/components/CopyButton";
-import RenderedContent from "@/components/RenderedContent";
+import PromptAccordion from "@/components/PromptAccordion";
 import { supabase, type Prompt } from "@/lib/supabase";
 
 export const revalidate = 60;
@@ -42,46 +41,16 @@ export default async function PromptsPage() {
 
         <SectionTitle kicker="Biblioteca">Prompts IA</SectionTitle>
 
+        <p className="mb-6 text-center text-sm text-white/55">
+          Toca cualquier prompt para verlo completo y copiarlo.
+        </p>
+
         {prompts.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-center text-sm text-white/60 backdrop-blur-md">
             Aún no hay prompts publicados. Vuelve pronto.
           </div>
         ) : (
-          <div className="space-y-4">
-            {prompts.map((p) => (
-              <div
-                key={p.id}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md transition-all duration-300 hover:border-neon-cyan/40 hover:shadow-[0_0_25px_rgba(0,240,255,0.3)]"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-base font-bold text-white sm:text-lg">
-                    {p.title}
-                  </h3>
-                  <CopyButton text={p.body} />
-                </div>
-                {p.description && (
-                  <div className="mt-2 text-sm">
-                    <RenderedContent html={p.description} />
-                  </div>
-                )}
-                <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-ink-950/70 p-4 text-xs leading-relaxed text-white/85 sm:text-sm">
-                  <code>{p.body}</code>
-                </pre>
-                {p.tags && p.tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {p.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-neon-cyan"
-                      >
-                        #{t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <PromptAccordion prompts={prompts} />
         )}
       </div>
     </main>
