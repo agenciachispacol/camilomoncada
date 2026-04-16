@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   User,
   Link2,
@@ -110,21 +110,30 @@ export default function AdminDashboard({
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.25 }}
-        >
-          {active === "profile" && <ProfileModule token={token} />}
-          {active === "links" && <LinksModule token={token} />}
-          {active === "contact" && <ContactModule token={token} />}
-          {active === "content" && <ContentModule token={token} />}
-          {active === "legal" && <LegalModule token={token} />}
-        </motion.div>
-      </AnimatePresence>
+      {/* key fuerza unmount + remount limpio al cambiar de módulo */}
+      <motion.div
+        key={active}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+      >
+        <ModuleRenderer id={active} token={token} />
+      </motion.div>
     </div>
   );
+}
+
+function ModuleRenderer({ id, token }: { id: ModuleId; token: string }) {
+  switch (id) {
+    case "profile":
+      return <ProfileModule token={token} />;
+    case "links":
+      return <LinksModule token={token} />;
+    case "contact":
+      return <ContactModule token={token} />;
+    case "content":
+      return <ContentModule token={token} />;
+    case "legal":
+      return <LegalModule token={token} />;
+  }
 }
