@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { getSettings } from "@/lib/data";
 
@@ -75,6 +76,9 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       apple: "/favicon.svg",
     },
+    verification: {
+      google: "G_A_P8D2eEDjtBy7PvGB858w0ujwsDWSN6Ik8PHC31w",
+    },
   };
 }
 
@@ -144,6 +148,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen bg-ink-950 text-white antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
