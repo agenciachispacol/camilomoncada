@@ -87,6 +87,7 @@ export async function POST(req: Request) {
       description: data.description || null,
       body: data.body,
       tags: Array.isArray(data.tags) ? data.tags : [],
+      images: Array.isArray(data.images) ? data.images : [],
     };
     const { data: inserted, error } = await supabase
       .from("prompts")
@@ -134,6 +135,8 @@ export async function PATCH(req: Request) {
     if (data.body !== undefined) payload.body = data.body;
     if (data.tags !== undefined)
       payload.tags = Array.isArray(data.tags) ? data.tags : [];
+    if (data.images !== undefined)
+      payload.images = Array.isArray(data.images) ? data.images : [];
   }
 
   const { data: updated, error } = await supabase

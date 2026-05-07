@@ -144,6 +144,26 @@ export default function PromptAccordion({
                   </pre>
                 </div>
 
+                {/* Galería de imágenes / ingredientes */}
+                {selected.images && selected.images.length > 0 && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-neon-cyan">
+                      Ingredientes
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {selected.images.map((url, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={i}
+                          src={url}
+                          alt={`Ingrediente ${i + 1}`}
+                          className="aspect-square rounded-xl border border-white/10 object-cover shadow-[0_0_15px_rgba(0,240,255,0.15)] transition-transform hover:scale-105"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Tags */}
                 {selected.tags && selected.tags.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">

@@ -6,6 +6,7 @@ import type { Article, Prompt } from "@/lib/supabase";
 import NeonEditor from "@/components/NeonEditor";
 import Field, { inputCls } from "./shared/Field";
 import UploadField from "./shared/UploadField";
+import MultiImageUpload from "./shared/MultiImageUpload";
 import SaveButton from "./shared/SaveButton";
 
 type Kind = "article" | "prompt";
@@ -36,6 +37,7 @@ export default function ContentForm({
   const [description, setDescription] = useState(item.description ?? "");
   const [body, setBody] = useState(item.body ?? "");
   const [tags, setTags] = useState((item.tags ?? []).join(", "));
+  const [images, setImages] = useState<string[]>(item.images ?? []);
   // shared
   const [visible, setVisible] = useState(item.visible ?? true);
 
@@ -80,6 +82,7 @@ export default function ContentForm({
                 .split(",")
                 .map((t) => t.trim())
                 .filter(Boolean),
+              images,
               visible,
             };
       await onSave(data, item.id);
@@ -179,6 +182,12 @@ export default function ContentForm({
                 placeholder="Actúa como..."
               />
             </Field>
+            <MultiImageUpload
+              images={images}
+              onChange={setImages}
+              token={token}
+              folder="prompts"
+            />
             <Field label="Tags (separados por coma)">
               <input
                 value={tags}

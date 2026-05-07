@@ -27,5 +27,6 @@ export type Prompt = {
   description: string | null;
   body: string;
   tags: string[] | null;
+  images: string[] | null;
   created_at: string;
 };
