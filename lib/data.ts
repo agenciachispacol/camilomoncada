@@ -79,3 +79,29 @@ export function whatsappUrlFrom(settings: SiteSettings) {
   const msg = encodeURIComponent(settings.whatsapp_message || "");
   return `https://wa.me/${num}?text=${msg}`;
 }
+
+export async function getLatestArticles(limit = 4) {
+  const supabase = anonClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("visible", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error || !data) return [];
+  return data;
+}
+
+export async function getLatestPrompts(limit = 6) {
+  const supabase = anonClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("prompts")
+    .select("*")
+    .eq("visible", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error || !data) return [];
+  return data;
+}

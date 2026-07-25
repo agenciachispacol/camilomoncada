@@ -1,16 +1,30 @@
-import { MessageCircle } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import NeonBackground from "@/components/NeonBackground";
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
 import CalEmbed from "@/components/CalEmbed";
 import SectionTitle from "@/components/SectionTitle";
 import DynamicLinkCard from "@/components/DynamicLinkCard";
-import { getSettings, getLinks, whatsappUrlFrom } from "@/lib/data";
+import PromptAccordion from "@/components/PromptAccordion";
+import ArticleAccordion from "@/components/ArticleAccordion";
+import {
+  getSettings,
+  getLinks,
+  getLatestPrompts,
+  getLatestArticles,
+  whatsappUrlFrom,
+} from "@/lib/data";
 
 export const revalidate = 60;
 
 export default async function Page() {
-  const [settings, links] = await Promise.all([getSettings(), getLinks()]);
+  const [settings, links, prompts, articles] = await Promise.all([
+    getSettings(),
+    getLinks(),
+    getLatestPrompts(6),
+    getLatestArticles(4),
+  ]);
   const whatsappUrl = whatsappUrlFrom(settings);
 
   return (
@@ -30,7 +44,6 @@ export default async function Page() {
       {/* Árbol de links dinámico */}
       <section className="px-5 py-10">
         <div className="mx-auto w-full max-w-xl space-y-3">
-          {/* CTA WhatsApp siempre visible arriba, con enlace calculado dinámicamente */}
           <DynamicLinkCard
             index={0}
             item={{
@@ -56,7 +69,6 @@ export default async function Page() {
             </a>
           </p>
 
-          {/* Links del árbol editables desde /estudio */}
           {links
             .filter((l) => !/wa\.me|whatsapp/i.test(l.url))
             .map((item, i) => (
@@ -64,6 +76,45 @@ export default async function Page() {
             ))}
         </div>
       </section>
+
+      {/* Prompts en la home */}
+      {prompts.length > 0 && (
+        <section className="px-5 py-12">
+          <div className="mx-auto max-w-xl">
+            <SectionTitle kicker="Biblioteca">Mis Prompts</SectionTitle>
+            <p className="mb-5 text-center text-sm text-white/55">
+              Toca cualquier prompt para verlo completo y copiarlo.
+            </p>
+            <PromptAccordion prompts={prompts} />
+            <div className="mt-4 text-center">
+              <Link
+                href="/prompts"
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neon-cyan transition-all hover:text-white"
+              >
+                Ver todos los prompts <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Artículos en la home */}
+      {articles.length > 0 && (
+        <section className="px-5 py-12">
+          <div className="mx-auto max-w-xl">
+            <SectionTitle kicker="Blog">Artículos & Tips</SectionTitle>
+            <ArticleAccordion articles={articles} />
+            <div className="mt-4 text-center">
+              <Link
+                href="/articulos"
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-neon-cyan transition-all hover:text-white"
+              >
+                Ver todos los artículos <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Servicios */}
       <section id="clases" className="px-5 py-12">
